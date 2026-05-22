@@ -387,9 +387,9 @@ button,a,.nav-btn,.snav,.tab,.typebtn,.gact,.badge,.dep-key{touch-action:manipul
       <button class="snav active" id="snav-home" onclick="goView('home')"><i class="ti ti-home"></i>Início</button>
       <button class="snav" id="snav-historico" onclick="goView('historico')"><i class="ti ti-arrows-exchange"></i>Histórico</button>
       <button class="snav" id="snav-objetivos" onclick="goView('objetivos')"><i class="ti ti-target"></i>Objetivos</button>
-      <button class="snav" id="snav-orcamento" onclick="goView('orcamento')"><i class="ti ti-chart-bar"></i>Orçamento</button>
-      <button class="snav" id="snav-metas" onclick="goView('metas')"><i class="ti ti-calendar-week"></i>Metas semanais</button>
       <button class="snav" id="snav-cartao" onclick="goView('cartao')"><i class="ti ti-credit-card"></i>Cartão</button>
+      <button class="snav" id="snav-metas" onclick="goView('metas')"><i class="ti ti-calendar-week"></i>Metas semanais</button>
+      <button class="snav" id="snav-orcamento" onclick="goView('orcamento')"><i class="ti ti-chart-bar"></i>Orçamento</button>
       <button class="snav" id="snav-insights" onclick="goView('insights')"><i class="ti ti-chart-dots"></i>Insights</button>
     </div>
     <div class="sb-foot">
@@ -508,8 +508,6 @@ button,a,.nav-btn,.snav,.tab,.typebtn,.gact,.badge,.dep-key{touch-action:manipul
       <button class="nav-btn active" id="nav-home" onclick="goView('home')"><i class="ti ti-home"></i>Início</button>
       <button class="nav-btn" id="nav-historico" onclick="goView('historico')"><i class="ti ti-arrows-exchange"></i>Histórico</button>
       <button class="nav-btn" id="nav-objetivos" onclick="goView('objetivos')"><i class="ti ti-target"></i>Objetivos</button>
-      <button class="nav-btn" id="nav-orcamento" onclick="goView('orcamento')"><i class="ti ti-chart-bar"></i>Orçamento</button>
-      <button class="nav-btn" id="nav-metas" onclick="goView('metas')"><i class="ti ti-calendar-week"></i>Metas</button>
       <button class="nav-btn" id="nav-cartao" onclick="goView('cartao')"><i class="ti ti-credit-card"></i>Cartão</button>
       <button class="nav-btn" id="nav-insights" onclick="goView('insights')"><i class="ti ti-chart-dots"></i>Insights</button>
     </div>
@@ -656,7 +654,7 @@ button,a,.nav-btn,.snav,.tab,.typebtn,.gact,.badge,.dep-key{touch-action:manipul
 <div class="modal-wrap" id="modal-rec">
   <div class="modal">
     <div class="modal-handle"></div>
-    <button class="modal-close" onclick="closeModal('modal-rec')"><i class="ti ti-x"></i></button>
+    <button class="modal-close" onclick="closeModal(\'modal-rec\')" aria-label="Fechar"><i class="ti ti-x"></i></button>
     <div class="modal-title">Nova conta fixa</div>
     <div class="fgroup"><div class="flabel">Nome da conta</div><input class="finput" id="rec-desc" placeholder="Ex: Aluguel, Internet, Academia..."></div>
     <div class="frow">
@@ -672,7 +670,7 @@ button,a,.nav-btn,.snav,.tab,.typebtn,.gact,.badge,.dep-key{touch-action:manipul
 <div class="modal-wrap" id="modal-cartao">
   <div class="modal">
     <div class="modal-handle"></div>
-    <button class="modal-close" onclick="closeModal('modal-cartao')"><i class="ti ti-x"></i></button>
+    <button class="modal-close" onclick="closeModal(\'modal-cartao\')" aria-label="Fechar"><i class="ti ti-x"></i></button>
     <div class="modal-title">Novo cartão</div>
     <div class="fgroup"><div class="flabel">Nome do cartão</div><input class="finput" id="ct-nome" placeholder="Ex: Nubank, Inter..."></div>
     <div class="fgroup"><div class="flabel">Limite (R$)</div><input class="finput" id="ct-limite" type="text" inputmode="decimal" placeholder="Ex: 3000,00"></div>
