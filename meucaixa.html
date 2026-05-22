@@ -389,6 +389,8 @@ button,a,.nav-btn,.snav,.tab,.typebtn,.gact,.badge,.dep-key{touch-action:manipul
       <button class="snav" id="snav-objetivos" onclick="goView('objetivos')"><i class="ti ti-target"></i>Objetivos</button>
       <button class="snav" id="snav-orcamento" onclick="goView('orcamento')"><i class="ti ti-chart-bar"></i>Orçamento</button>
       <button class="snav" id="snav-metas" onclick="goView('metas')"><i class="ti ti-calendar-week"></i>Metas semanais</button>
+      <button class="snav" id="snav-cartao" onclick="goView('cartao')"><i class="ti ti-credit-card"></i>Cartão</button>
+      <button class="snav" id="snav-insights" onclick="goView('insights')"><i class="ti ti-chart-dots"></i>Insights</button>
     </div>
     <div class="sb-foot">
       <div class="ucard">
@@ -508,6 +510,8 @@ button,a,.nav-btn,.snav,.tab,.typebtn,.gact,.badge,.dep-key{touch-action:manipul
       <button class="nav-btn" id="nav-objetivos" onclick="goView('objetivos')"><i class="ti ti-target"></i>Objetivos</button>
       <button class="nav-btn" id="nav-orcamento" onclick="goView('orcamento')"><i class="ti ti-chart-bar"></i>Orçamento</button>
       <button class="nav-btn" id="nav-metas" onclick="goView('metas')"><i class="ti ti-calendar-week"></i>Metas</button>
+      <button class="nav-btn" id="nav-cartao" onclick="goView('cartao')"><i class="ti ti-credit-card"></i>Cartão</button>
+      <button class="nav-btn" id="nav-insights" onclick="goView('insights')"><i class="ti ti-chart-dots"></i>Insights</button>
     </div>
   </div>
 </div>
@@ -541,6 +545,20 @@ button,a,.nav-btn,.snav,.tab,.typebtn,.gact,.badge,.dep-key{touch-action:manipul
         <option value="">Nenhuma (não conta nas metas)</option>
       </select>
       <div id="meta-info-banner" style="display:none;border-radius:var(--rad-sm);padding:10px 12px;font-size:12px;margin-top:8px;line-height:1.5;"></div>
+    </div>
+    <!-- PARCELAMENTO -->
+    <div id="parcela-wrap" style="display:none;margin-bottom:4px;">
+      <div class="flabel" style="margin-bottom:6px;">Parcelado em quantas vezes?</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input class="finput" id="f-parcelas" type="number" min="2" max="48" placeholder="Ex: 6" style="width:100px;">
+        <span style="font-size:13px;color:var(--tx2);" id="parcela-preview"></span>
+      </div>
+    </div>
+    <div id="parcela-toggle" style="display:none;margin-bottom:10px;">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--tx2);">
+        <input type="checkbox" id="f-parcelar" onchange="toggleParcela()" style="width:16px;height:16px;cursor:pointer;">
+        Parcelar este gasto
+      </label>
     </div>
     <div class="modal-btns"><button class="btn-cancel" onclick="closeModal('modal-tx')">Cancelar</button><button class="btn-save" onclick="saveTx()">Salvar</button></div>
   </div>
@@ -647,6 +665,22 @@ button,a,.nav-btn,.snav,.tab,.typebtn,.gact,.badge,.dep-key{touch-action:manipul
     </div>
     <div class="fgroup"><div class="flabel">Categoria</div><select class="fselect" id="rec-cat"></select></div>
     <div class="modal-btns"><button class="btn-cancel" onclick="closeModal('modal-rec')">Cancelar</button><button class="btn-save" onclick="saveRecorrente()">Salvar</button></div>
+  </div>
+</div>
+
+<!-- MODAL CARTÃO -->
+<div class="modal-wrap" id="modal-cartao">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <button class="modal-close" onclick="closeModal('modal-cartao')"><i class="ti ti-x"></i></button>
+    <div class="modal-title">Novo cartão</div>
+    <div class="fgroup"><div class="flabel">Nome do cartão</div><input class="finput" id="ct-nome" placeholder="Ex: Nubank, Inter..."></div>
+    <div class="fgroup"><div class="flabel">Limite (R$)</div><input class="finput" id="ct-limite" type="text" inputmode="decimal" placeholder="Ex: 3000,00"></div>
+    <div class="frow">
+      <div class="fgroup"><div class="flabel">Dia fechamento</div><input class="finput" id="ct-fecha" type="number" min="1" max="28" placeholder="Ex: 25"></div>
+      <div class="fgroup"><div class="flabel">Dia vencimento</div><input class="finput" id="ct-vence" type="number" min="1" max="28" placeholder="Ex: 5"></div>
+    </div>
+    <div class="modal-btns"><button class="btn-cancel" onclick="closeModal('modal-cartao')">Cancelar</button><button class="btn-save" onclick="saveCartao()">Salvar</button></div>
   </div>
 </div>
 
@@ -902,6 +936,7 @@ async function loadData(){
     if(!g.length)for(const x of goals)await db.dbSave(u,'goals',x.id,x);
     await loadRecorrentes();
     await checkAllRecorrentes();
+    await loadCartoes();
   }catch(e){txs=[];goals=defaultGoals();metas=[];}
 }
 function defaultGoals(){return[
@@ -952,6 +987,8 @@ function renderAll(){
   else if(curView==='orcamento')setTimeout(renderOrcamento,50);
   else if(curView==='metas')renderMetas();
   else if(curView==='recorrentes')renderRecorrentes();
+  else if(curView==='cartao')renderCartao();
+  else if(curView==='insights')renderInsights();
 }
 
 // ── HOME ──────────────────────────────────────────────────────────
@@ -1432,6 +1469,15 @@ function selType(t){
   const wrap=document.getElementById('meta-toggle-wrap');
   if(wrap)wrap.style.display=t==='despesa'?'block':'none';
   if(t==='despesa')updateSemanasSelect();
+  // Parcelamento só em despesa
+  const pt=document.getElementById('parcela-toggle');
+  if(pt)pt.style.display=t==='despesa'?'block':'none';
+  if(t!=='despesa'){
+    const pw=document.getElementById('parcela-wrap');
+    if(pw)pw.style.display='none';
+    const pc=document.getElementById('f-parcelar');
+    if(pc)pc.checked=false;
+  }
   updateObjLink();
   updateMetaInfo();
 }
@@ -1536,6 +1582,15 @@ async function saveTx(){
       }
     }
   }
+  // Verificar parcelamento
+  const parcelar=document.getElementById('f-parcelar')?.checked&&txType==='despesa';
+  const nParcelas=parcelar?parseInt(document.getElementById('f-parcelas')?.value||'0'):0;
+  if(parcelar&&nParcelas>=2){
+    await saveTxParcelado(desc,val,date,cat,semanaId,objLinkId,nParcelas);
+    closeModal('modal-tx');renderAll();
+    toast(`✓ ${nParcelas}x de ${fmt(val/nParcelas)} lançadas!`);
+    return;
+  }
   closeModal('modal-tx');
   renderAll();
   setTimeout(checkAlertas,300);
@@ -1605,6 +1660,7 @@ function headerAdd(){
   if(curView==='home'||curView==='historico')openTxModal();
   else if(curView==='objetivos')openGoalModal();
   else if(curView==='metas')openMetaModal();
+  else if(curView==='cartao')openCartaoModal();
 }
 
 // ── MODALS ────────────────────────────────────────────────────────
@@ -1671,7 +1727,9 @@ function renderTxFull(filter){
   let list=currentTxFilter==='all'?monthTxs():monthTxs().filter(t=>t.tipo===currentTxFilter);
   const cat=document.getElementById('cat-filter')?.value||'';
   if(cat)list=list.filter(t=>t.cat===cat);
-  document.getElementById('full-tx').innerHTML=list.length?list.map(t=>txHtml(t,true)).join(''):'<div class="empty"><i class="ti ti-receipt-off"></i>Nenhuma transação</div>';
+  const q=(document.getElementById('hist-search')?.value||'').toLowerCase().trim();
+  if(q)list=list.filter(t=>t.desc.toLowerCase().includes(q)||t.cat.toLowerCase().includes(q));
+  document.getElementById('full-tx').innerHTML=list.length?list.map(t=>txHtml(t,true)).join(''):`<div class="empty"><i class="ti ti-receipt-off"></i>${q?'Nenhum resultado para "'+q+'"':'Nenhuma transação'}</div>`;
   updateCatFilterOptions();
 }
 
@@ -1914,6 +1972,239 @@ function fecharAlerta(id){
   const el=document.getElementById('alerta-'+id);
   if(el)el.remove();
 
+}
+
+// ── PARCELAMENTO ─────────────────────────────────────────────────
+function toggleParcela(){
+  const cb=document.getElementById('f-parcelar');
+  const wrap=document.getElementById('parcela-wrap');
+  if(wrap)wrap.style.display=cb?.checked?'block':'none';
+}
+function updateParcelaPreview(){
+  const val=parseFloat((document.getElementById('f-val')?.value||'').replace(',','.'));
+  const n=parseInt(document.getElementById('f-parcelas')?.value||'0');
+  const prev=document.getElementById('parcela-preview');
+  if(prev&&val&&n>=2)prev.textContent=`= ${n}x de ${fmt(val/n)}`;
+  else if(prev)prev.textContent='';
+}
+
+async function saveTxParcelado(desc,val,date,cat,semanaId,objLinkId,n){
+  // Lança n parcelas nos próximos n meses
+  const parcId=uid();
+  let d=new Date(date+'T00:00:00');
+  for(let i=0;i<n;i++){
+    const pDate=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const tx={
+      id:uid(),tipo:'despesa',
+      desc:`${desc} (${i+1}/${n})`,
+      val:Math.round(val/n*100)/100,
+      date:pDate,cat,
+      contaMeta:semanaId!=='',semanaId,objLink:objLinkId,
+      parcId,parcNum:i+1,parcTotal:n
+    };
+    txs.push(tx);
+    await db.dbSave(curUser.uid,'txs',tx.id,tx);
+    d.setMonth(d.getMonth()+1);
+  }
+}
+
+// ── CARTÃO DE CRÉDITO ─────────────────────────────────────────────
+let cartoes=[];
+
+async function loadCartoes(){
+  try{cartoes=await db.dbAll(curUser.uid,'cartoes');}
+  catch(e){cartoes=[];}
+}
+
+function openCartaoModal(){
+  ['ct-nome','ct-limite','ct-fecha','ct-vence'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.value='';
+  });
+  const btn=document.querySelector('#modal-cartao .btn-save');
+  if(btn){btn.textContent='Salvar';btn.disabled=false;}
+  document.getElementById('modal-cartao').classList.add('on');
+}
+
+async function saveCartao(){
+  const btn=document.querySelector('#modal-cartao .btn-save');
+  if(btn&&btn.disabled)return;
+  if(btn){btn.disabled=true;btn.textContent='Salvando...';}
+  const nome=document.getElementById('ct-nome').value.trim();
+  const limite=parseFloat((document.getElementById('ct-limite').value||'').replace(',','.'));
+  const fecha=parseInt(document.getElementById('ct-fecha').value);
+  const vence=parseInt(document.getElementById('ct-vence').value);
+  if(!nome||!limite||!fecha||!vence){toast('Preencha todos os campos');resetModalBtn('modal-cartao');return;}
+  const c={id:uid(),nome,limite,fecha,vence,cor:COLORS[cartoes.length%COLORS.length]};
+  cartoes.push(c);
+  await db.dbSave(curUser.uid,'cartoes',c.id,c);
+  closeModal('modal-cartao');renderCartao();toast('Cartão adicionado!');
+}
+
+function getCartaoGastos(cartaoId){
+  // Gastos do mês no cartão
+  const mesKey=`${curYear}-${String(curMonth).padStart(2,'0')}`;
+  return txs.filter(t=>t.tipo==='despesa'&&t.cartaoId===cartaoId&&t.date.startsWith(mesKey));
+}
+
+function getFaturaStatus(c){
+  const hoje=new Date().getDate();
+  // Se hoje é antes do fechamento = fatura aberta
+  // Se hoje é após fechamento = fatura fechada (a pagar)
+  return hoje<c.fecha?'aberta':'fechada';
+}
+
+function renderCartao(){
+  const el=document.getElementById('cartao-list');
+  if(!el)return;
+  if(!cartoes.length){
+    el.innerHTML='<div class="empty"><i class="ti ti-credit-card"></i>Nenhum cartão cadastrado<br><span style="font-size:12px;color:var(--tx3);display:block;margin-top:6px">Adicione seu cartão abaixo</span></div>';
+    return;
+  }
+  el.innerHTML=cartoes.map(c=>{
+    const gastos=getCartaoGastos(c.id);
+    const total=gastos.reduce((s,t)=>s+t.val,0);
+    const disponivel=Math.max(0,c.limite-total);
+    const pct=Math.min(100,Math.round(total/c.limite*100));
+    const status=getFaturaStatus(c);
+    const barCol=pct>80?'var(--r)':pct>50?'var(--am)':'var(--g)';
+    return`<div class="card" style="margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <div style="width:42px;height:42px;border-radius:10px;background:${c.cor};display:flex;align-items:center;justify-content:center;"><i class="ti ti-credit-card" style="color:#fff;font-size:20px;"></i></div>
+        <div style="flex:1">
+          <div style="font-size:15px;font-weight:600;">${c.nome}</div>
+          <div style="font-size:11px;color:var(--tx3);">Fecha dia ${c.fecha} · Vence dia ${c.vence}</div>
+        </div>
+        <span style="font-size:11px;font-weight:600;padding:4px 10px;border-radius:99px;${status==='aberta'?'background:var(--gl);color:var(--gd)':'background:var(--aml);color:var(--am)'}">Fatura ${status}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;">
+        <div style="text-align:center"><div style="font-size:10px;color:var(--tx3);">Limite</div><div style="font-size:14px;font-weight:600;font-family:'DM Mono',monospace;">${fmt(c.limite)}</div></div>
+        <div style="text-align:center"><div style="font-size:10px;color:var(--tx3);">Usado</div><div style="font-size:14px;font-weight:600;font-family:'DM Mono',monospace;color:var(--r);">${fmt(total)}</div></div>
+        <div style="text-align:center"><div style="font-size:10px;color:var(--tx3);">Disponível</div><div style="font-size:14px;font-weight:600;font-family:'DM Mono',monospace;color:var(--g);">${fmt(disponivel)}</div></div>
+      </div>
+      <div style="height:6px;background:var(--bg);border-radius:99px;overflow:hidden;margin-bottom:10px;">
+        <div style="width:${pct}%;height:100%;background:${barCol};border-radius:99px;"></div>
+      </div>
+      ${gastos.length?`<div style="font-size:12px;color:var(--tx3);">${gastos.length} gasto(s) este mês</div>`:'<div style="font-size:12px;color:var(--tx3);">Nenhum gasto este mês</div>'}
+      <button onclick="deleteCartao('${c.id}')" style="margin-top:10px;background:var(--rl);border:none;border-radius:var(--rad-sm);padding:7px 14px;color:var(--r);font-size:12px;cursor:pointer;">Excluir cartão</button>
+    </div>`;
+  }).join('');
+}
+
+async function deleteCartao(id){
+  if(!confirm('Excluir este cartão?'))return;
+  cartoes=cartoes.filter(c=>c.id!==id);
+  await db.dbDel(curUser.uid,'cartoes',id);
+  renderCartao();
+}
+
+// ── INSIGHTS ──────────────────────────────────────────────────────
+function renderInsights(){
+  const el=document.getElementById('insights-content');
+  if(!el)return;
+
+  const list=monthTxs();
+  const rec=totRec(list),dep=totDep(list);
+  const carry=carryOver();
+  const total=rec-dep+carry;
+
+  // Previsão de fechamento
+  const hoje=new Date().getDate();
+  const diasNoMes=new Date(curYear,curMonth,0).getDate();
+  const diasRestantes=diasNoMes-hoje;
+  const gastoDiario=dep/hoje;
+  const previsaoGasto=dep+(gastoDiario*diasRestantes);
+  const previsaoSaldo=rec+carry-previsaoGasto;
+
+  // Comparativo mês anterior
+  const mesAnt=curMonth===1?12:curMonth-1;
+  const anoAnt=curMonth===1?curYear-1:curYear;
+  const keyAnt=`${anoAnt}-${String(mesAnt).padStart(2,'0')}`;
+  const listAnt=txs.filter(t=>t.date.startsWith(keyAnt));
+  const depAnt=totDep(listAnt),recAnt=totRec(listAnt);
+  const diffDep=depAnt>0?Math.round((dep-depAnt)/depAnt*100):0;
+  const diffRec=recAnt>0?Math.round((rec-recAnt)/recAnt*100):0;
+
+  // Gastos por categoria este mês
+  const cats={};
+  list.filter(t=>t.tipo==='despesa').forEach(t=>{cats[t.cat]=(cats[t.cat]||0)+t.val;});
+  const catsAnt={};
+  listAnt.filter(t=>t.tipo==='despesa').forEach(t=>{catsAnt[t.cat]=(catsAnt[t.cat]||0)+t.val;});
+
+  // Projeção de objetivos
+  const goalProjections=goals.filter(g=>!g.done&&g.saved<g.target).map(g=>{
+    const falta=g.target-g.saved;
+    // Média mensal de depósitos nos últimos 3 meses
+    const depositos=txs.filter(t=>t.objLink===g.id);
+    const mediaMensal=depositos.length>0?depositos.reduce((s,t)=>s+t.val,0)/Math.max(1,depositos.length/30*30):0;
+    const mesesRestantes=mediaMensal>0?Math.ceil(falta/mediaMensal):null;
+    return{...g,falta,mediaMensal,mesesRestantes};
+  });
+
+  // Alerta gasto acima do normal
+  const alertaGasto=diffDep>20?`⚠️ Você gastou <b>${diffDep}% a mais</b> que o mês passado.`:'';
+
+  el.innerHTML=`
+    <!-- PREVISÃO -->
+    <div class="card" style="margin-bottom:12px;">
+      <div style="font-size:14px;font-weight:600;margin-bottom:12px;">🔮 Previsão de fechamento</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="mcard"><div class="mcard-label">Gasto previsto</div><div class="mcard-val neg">${fmt(previsaoGasto)}</div><div style="font-size:11px;color:var(--tx3);">se mantiver ritmo</div></div>
+        <div class="mcard"><div class="mcard-label">Saldo previsto</div><div class="mcard-val ${previsaoSaldo>=0?'pos':'neg'}">${previsaoSaldo>=0?'':'-'}${fmt(Math.abs(previsaoSaldo))}</div><div style="font-size:11px;color:var(--tx3);">no fim do mês</div></div>
+      </div>
+      <div style="margin-top:10px;font-size:12px;color:var(--tx2);">Baseado nos últimos <b>${hoje} dias</b> — gasto médio de <b>${fmt(gastoDiario)}/dia</b></div>
+    </div>
+
+    <!-- COMPARATIVO -->
+    <div class="card" style="margin-bottom:12px;">
+      <div style="font-size:14px;font-weight:600;margin-bottom:12px;">📊 Comparativo com mês anterior</div>
+      ${alertaGasto?`<div style="background:var(--aml);border-radius:var(--rad-sm);padding:10px 12px;font-size:13px;color:var(--am);margin-bottom:10px;">${alertaGasto}</div>`:''}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="mcard">
+          <div class="mcard-label">Receitas</div>
+          <div class="mcard-val">${fmt(rec)}</div>
+          <div style="font-size:11px;margin-top:2px;color:${diffRec>=0?'var(--g)':'var(--r)'};">${diffRec>=0?'▲':'▼'} ${Math.abs(diffRec)}% vs mês ant.</div>
+        </div>
+        <div class="mcard">
+          <div class="mcard-label">Despesas</div>
+          <div class="mcard-val neg">${fmt(dep)}</div>
+          <div style="font-size:11px;margin-top:2px;color:${diffDep<=0?'var(--g)':'var(--r)'};">${diffDep>=0?'▲':'▼'} ${Math.abs(diffDep)}% vs mês ant.</div>
+        </div>
+      </div>
+      <!-- Top categorias com variação -->
+      <div style="margin-top:12px;">
+        <div style="font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:8px;">Por categoria</div>
+        ${Object.entries(cats).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([cat,val])=>{
+          const ant=catsAnt[cat]||0;
+          const diff=ant>0?Math.round((val-ant)/ant*100):null;
+          const ic=CAT_ICON[cat]||'ti-dots';
+          return`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--brd);">
+            <i class="ti ${ic}" style="font-size:14px;color:var(--tx3);width:20px;"></i>
+            <span style="flex:1;font-size:13px;">${cat}</span>
+            <span style="font-size:13px;font-weight:500;font-family:'DM Mono',monospace;">${fmt(val)}</span>
+            ${diff!==null?`<span style="font-size:11px;font-weight:600;color:${diff<=0?'var(--g)':'var(--r)'};">${diff>=0?'▲':'▼'}${Math.abs(diff)}%</span>`:'<span style="font-size:11px;color:var(--tx3);">novo</span>'}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+
+    <!-- PROJEÇÃO OBJETIVOS -->
+    ${goalProjections.length?`
+    <div class="card" style="margin-bottom:12px;">
+      <div style="font-size:14px;font-weight:600;margin-bottom:12px;">🎯 Projeção dos objetivos</div>
+      ${goalProjections.map(g=>`
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--brd);">
+          <div style="font-size:22px;">${g.emoji}</div>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:500;">${g.name}</div>
+            <div style="font-size:11px;color:var(--tx3);">Falta ${fmt(g.falta)}</div>
+          </div>
+          <div style="text-align:right;">
+            ${g.mesesRestantes?`<div style="font-size:13px;font-weight:600;color:var(--g);">${g.mesesRestantes} meses</div><div style="font-size:10px;color:var(--tx3);">no ritmo atual</div>`:`<div style="font-size:12px;color:var(--tx3);">sem depósitos</div>`}
+          </div>
+        </div>
+      `).join('')}
+    </div>`:''}
+  `;
 }
 
 // ── INIT ──────────────────────────────────────────────────────────
