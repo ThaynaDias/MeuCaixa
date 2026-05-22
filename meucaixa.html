@@ -497,10 +497,8 @@ button,a,.nav-btn,.snav,.tab,.typebtn,.gact,.badge,.dep-key{touch-action:manipul
         <div class="week-selector" id="week-selector"></div>
         <div class="week-summary" id="week-summary"></div>
         <div class="card"><div id="metas-list"></div></div>
-        <div style="display:flex;gap:10px;">
-        <button class="add-dashed" style="flex:1" onclick="openMetaModal()"><i class="ti ti-plus"></i>Nova meta</button>
-        <button class="add-dashed" style="flex:1;border-color:var(--r);color:var(--r);" onclick="limparGastosMetas()"><i class="ti ti-eraser"></i>Limpar gastos</button>
-      </div>
+        <button class="add-dashed" onclick="openMetaModal()"><i class="ti ti-plus"></i>Nova meta de categoria</button>
+      <button onclick="limparGastosMetas()" style="width:100%;padding:10px;border:1px solid var(--brd);border-radius:var(--rad);background:none;color:var(--r);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;"><i class="ti ti-eraser"></i>Limpar gastos do mês nas metas</button>
       </div>
     </div>
 
@@ -536,24 +534,13 @@ button,a,.nav-btn,.snav,.tab,.typebtn,.gact,.badge,.dep-key{touch-action:manipul
       <div style="font-size:11px;color:var(--tx3);margin-top:5px;">O valor será depositado automaticamente no objetivo selecionado</div>
     </div>
 
-    <!-- CONTA NO LIMITE — aparece só em despesa -->
+    <!-- SEMANA DO GASTO — aparece só em despesa -->
     <div id="meta-toggle-wrap" style="display:none;">
-      <div class="flabel" style="margin-bottom:6px;">Contar no limite semanal?</div>
-      <div class="type-row">
-        <div class="typebtn sel-r" id="meta-sim" onclick="selMeta(true)">✓ Sim</div>
-        <div class="typebtn" id="meta-nao" onclick="selMeta(false)">✕ Não</div>
-      </div>
-      <!-- Seletor de qual semana contar -->
-      <div id="meta-semana-wrap" style="margin-top:10px;">
-        <div class="flabel" style="margin-bottom:6px;">Em qual semana?</div>
-        <select class="fselect" id="f-semana-offset">
-          <option value="0">Esta semana</option>
-          <option value="-1">Semana passada</option>
-          <option value="-2">Semana retrasada</option>
-        </select>
-      </div>
-      <!-- Info de quanto já gastou na meta -->
-      <div id="meta-info-banner" style="display:none;border-radius:var(--rad-sm);padding:10px 12px;font-size:12px;margin-top:10px;margin-bottom:2px;line-height:1.5;"></div>
+      <div class="flabel" style="margin-bottom:6px;">Semana</div>
+      <select class="fselect" id="f-semana-id">
+        <option value="">Nenhuma (não conta nas metas)</option>
+      </select>
+      <div id="meta-info-banner" style="display:none;border-radius:var(--rad-sm);padding:10px 12px;font-size:12px;margin-top:8px;line-height:1.5;"></div>
     </div>
     <div class="modal-btns"><button class="btn-cancel" onclick="closeModal('modal-tx')">Cancelar</button><button class="btn-save" onclick="saveTx()">Salvar</button></div>
   </div>
@@ -627,23 +614,13 @@ button,a,.nav-btn,.snav,.tab,.typebtn,.gact,.badge,.dep-key{touch-action:manipul
   <div class="modal">
     <div class="modal-handle"></div>
     <button class="modal-close" onclick="closeModal('modal-meta')" aria-label="Fechar"><i class="ti ti-x"></i></button>
-    <div class="modal-title">Nova meta de gasto</div>
-    <div class="fgroup"><div class="flabel">Nome do período (ex: Quinzena, Semana)</div><input class="finput" id="m-name" placeholder="Ex: Quinzena de maio"></div>
-    <div class="fgroup"><div class="flabel">Categoria</div><select class="fselect" id="m-cat"></select></div>
-    <div class="fgroup"><div class="flabel">Limite (R$)</div><input class="finput" id="m-val" type="number" min="1" step="0.01" placeholder="Ex: 300,00"></div>
-    <div class="frow">
-      <div class="fgroup"><div class="flabel">Dia início</div><input class="finput" id="m-start" type="number" min="1" max="31" placeholder="Ex: 20"></div>
-      <div class="fgroup"><div class="flabel">Dia fim</div><input class="finput" id="m-end" type="number" min="1" max="31" placeholder="Ex: 30"></div>
-    </div>
-    <div style="background:var(--gl);border-radius:var(--rad-sm);padding:10px 12px;font-size:12px;color:var(--gd);margin-bottom:4px;"><i class="ti ti-info-circle" style="margin-right:5px"></i>O período usa o mês que você está visualizando</div>
+    <div class="modal-title">Nova semana</div>
+    <div class="fgroup"><div class="flabel">Nome da semana</div><input class="finput" id="m-nome" placeholder="Ex: Semana 1, Semana do salário..."></div>
+    <div class="fgroup"><div class="flabel">Limite de gastos (R$)</div><input class="finput" id="m-val" type="text" inputmode="decimal" placeholder="Ex: 300,00"></div>
     <div class="modal-btns"><button class="btn-cancel" onclick="closeModal('modal-meta')">Cancelar</button><button class="btn-save" onclick="saveMeta()">Salvar</button></div>
   </div>
 </div>
 
-<!-- MODAL EDITAR TX -->
-<div class="modal-wrap" id="modal-edit-tx">
-  <div class="modal">
-    <div class="modal-handle"></div>
     <button class="modal-close" onclick="closeModal('modal-edit-tx')" aria-label="Fechar"><i class="ti ti-x"></i></button>
     <div class="modal-title">Editar lançamento</div>
     <div class="fgroup"><div class="flabel">Tipo</div><div class="type-row"><div class="typebtn sel-r" id="ebtn-r" onclick="selEditType('receita')">+ Receita</div><div class="typebtn" id="ebtn-d" onclick="selEditType('despesa')">− Despesa</div></div></div>
@@ -1009,7 +986,9 @@ function txHtml(t,showDel){
   const goalLink=t.objLink?goals.find(g=>g.id===t.objLink):null;
   const goalTag=goalLink?` → ${goalLink.emoji} ${goalLink.name}`:'';
   const fixaTag=t.fixoId?` <span style="background:var(--aml);color:var(--am);font-size:10px;padding:1px 5px;border-radius:99px;font-weight:600;">📅 Fixa</span>`:'';
-  return`<div class="tx-item"><div class="tx-ico ${cls}"><i class="ti ${ic}"></i></div><div class="tx-info"><div class="tx-name">${t.desc}${fixaTag}</div><div class="tx-meta">${fmtD(t.date)} · ${t.cat}${goalTag}</div></div><div class="tx-amt ${t.tipo==='receita'?'pos':'neg'}">${t.tipo==='receita'?'+':'-'}${fmt(t.val)}</div>${actions}</div>`;
+  const semMeta=t.semanaId?metas.find(m=>m.id===t.semanaId):null;
+  const semTag=semMeta?` <span style="background:var(--bll);color:var(--bl);font-size:10px;padding:1px 5px;border-radius:99px;font-weight:600;">📊 ${semMeta.nome}</span>`:'';
+  return`<div class="tx-item"><div class="tx-ico ${cls}"><i class="ti ${ic}"></i></div><div class="tx-info"><div class="tx-name">${t.desc}${fixaTag}${semTag}</div><div class="tx-meta">${fmtD(t.date)} · ${t.cat}${goalTag}</div></div><div class="tx-amt ${t.tipo==='receita'?'pos':'neg'}">${t.tipo==='receita'?'+':'-'}${fmt(t.val)}</div>${actions}</div>`;
 }
 function renderTxFull(filter){
   const list=filter==='all'?monthTxs():monthTxs().filter(t=>t.tipo===filter);
@@ -1157,44 +1136,21 @@ function fmtWeekRangeLabel(start,end){
 }
 // Verifica se tx deve contar no limite — aceita true, "true", 1, "sim"
 function contaNoLimite(t){
-  return t.contaMeta===true||t.contaMeta==='true'||t.contaMeta===1||t.contaMeta==='sim';
+  return t.semanaId||(t.contaMeta===true||t.contaMeta==='true'||t.contaMeta===1||t.contaMeta==='sim');
 }
 
 // ── METAS SEMANAIS ────────────────────────────────────────────────
 function renderMetas(){
-  // Seletor de semana — botões para navegar
+  // Sem seletor de semana — mostra gastos do mês atual
   const sel=document.getElementById('week-selector');
-  if(sel){
-    sel.innerHTML=[-2,-1,0].map(o=>{
-      const{start,end}=getWeekRange(o);
-      const lbl=o===0?'Esta semana':o===-1?'Sem. passada':fmtWeekRangeLabel(start,end);
-      const ativo=curWeekOffset===o;
-      return`<button onclick="setWeekOffset(${o})" style="
-        padding:6px 14px;border-radius:99px;font-size:12px;font-weight:500;cursor:pointer;
-        border:1px solid ${ativo?'var(--g)':'var(--brd)'};
-        background:${ativo?'var(--g)':'var(--sur)'};
-        color:${ativo?'#fff':'var(--tx2)'};
-      ">${lbl}</button>`;
-    }).join('');
-  }
+  if(sel)sel.innerHTML='';
 
-  // Semana selecionada
-  const{start:wStart,end:wEnd}=getWeekRange(curWeekOffset);
-  const weekLabel=fmtWeekRangeLabel(wStart,wEnd);
+  // Pega todos os gastos do mês marcados no limite semanal
+  const mesKey=`${curYear}-${String(curMonth).padStart(2,'0')}`;
+  // Gastos do mês com semana vinculada
+  const mesTxs=txs.filter(t=>t.tipo==='despesa'&&t.semanaId&&t.date.startsWith(mesKey));
 
-  // Despesas da semana selecionada marcadas como "contar no limite"
-  // Filtra: contaMeta=true E (sem semanaOffset = usa data, com semanaOffset = usa o offset salvo)
-  const weekTxs=txs.filter(t=>{
-    if(t.tipo!=='despesa'||!contaNoLimite(t))return false;
-    // Se tem semanaOffset salvo, comparar com o offset selecionado
-    if(t.semanaOffset!==undefined&&t.semanaOffset!==null){
-      return t.semanaOffset===curWeekOffset;
-    }
-    // Senão usa a data para filtrar pela semana
-    return dateInRange(t.date,wStart,wEnd);
-  });
-
-  const totalSpent=weekTxs.reduce((s,t)=>s+t.val,0);
+  const totalSpent=mesTxs.reduce((s,t)=>s+t.val,0);
   const totalLimit=metas.reduce((s,m)=>s+m.limit,0);
   const dispVal=totalLimit>0?totalLimit-totalSpent:0;
   const dispStr=dispVal>=0?fmt(dispVal):'- '+fmt(Math.abs(dispVal));
@@ -1202,7 +1158,7 @@ function renderMetas(){
 
   document.getElementById('week-summary').innerHTML=`
     <div class="wsum"><div class="wsum-lbl">💸 Gasto</div><div class="wsum-val neg">${fmt(totalSpent)}</div></div>
-    <div class="wsum"><div class="wsum-lbl">🎯 Limite total</div><div class="wsum-val">${totalLimit>0?fmt(totalLimit):'—'}</div></div>
+    <div class="wsum"><div class="wsum-lbl">🎯 Limite</div><div class="wsum-val">${totalLimit>0?fmt(totalLimit):'—'}</div></div>
     <div class="wsum"><div class="wsum-lbl">${dispVal>=0?'✅':'⚠️'} Disponível</div><div class="wsum-val ${dispCls}">${totalLimit>0?dispStr:'—'}</div></div>
   `;
 
@@ -1212,8 +1168,7 @@ function renderMetas(){
   }
 
   document.getElementById('metas-list').innerHTML=metas.map(m=>{
-    const cats=getCatsForMeta(m.cat);
-    const spent=weekTxs.filter(t=>cats.includes(t.cat)).reduce((s,t)=>s+t.val,0);
+    const spent=mesTxs.filter(t=>t.semanaId===m.id).reduce((s,t)=>s+t.val,0);
     const pct=Math.min(100,m.limit>0?Math.round(spent/m.limit*100):0);
     const over=spent>m.limit&&m.limit>0;
     const warn=pct>=80&&!over;
@@ -1222,8 +1177,7 @@ function renderMetas(){
     const tagTx=over?`⚠️ Passou! ${pct}%`:warn?`⚡ ${pct}% — quase no limite`:`${pct}% usado`;
     const ic=CAT_ICON[m.cat]||'ti-dots';
     const cls=CAT_CLS[m.cat]||'ic-a';
-    const subGasto=cats.filter(c=>c!==m.cat&&weekTxs.some(t=>t.cat===c));
-    const subInfo=subGasto.length?`<div style="font-size:10px;color:var(--tx3);margin-top:2px;">Inclui: ${subGasto.join(', ')}</div>`:'';
+    const subInfo='';
     return`<div class="week-item">
       <div class="week-ico ${cls}"><i class="ti ${ic}"></i></div>
       <div class="week-info">
@@ -1235,13 +1189,12 @@ function renderMetas(){
       </div>
       <div class="week-right">
         <div class="week-spent" style="color:${over?'var(--r)':'var(--tx)'}">${fmt(spent)}</div>
-        <div class="week-limit">de ${fmt(m.limit)}/sem</div>
+        <div class="week-limit">de ${fmt(m.limit)}</div>
       </div>
       <button class="meta-del" data-mid="${m.id}" onclick="deleteMeta(this.dataset.mid)"><i class="ti ti-trash"></i></button>
     </div>`;
   }).join('');
 }
-function setWeek(offset){curWeekOffset=offset;renderMetas();}
 function setWeekOffset(o){curWeekOffset=o;renderMetas();}
 
 function renderHistMetasResumo(){
@@ -1342,12 +1295,10 @@ async function saveGoal(){
 
 // ── META MODAL ────────────────────────────────────────────────────
 function openMetaModal(){
-  const GRUPOS=Object.keys(CAT_GROUPS);
-  document.getElementById('m-cat').innerHTML=GRUPOS.map(c=>`<option>${c}</option>`).join('');
-  document.getElementById('m-name').value='';
-  document.getElementById('m-val').value='';
-  document.getElementById('m-start').value='1';
-  document.getElementById('m-end').value='31';
+  const el=document.getElementById('m-nome');
+  if(el)el.value='';
+  const elv=document.getElementById('m-val');
+  if(elv)elv.value='';
   document.getElementById('m-val').value='';
   document.getElementById('modal-meta').classList.add('on');
 }
@@ -1355,34 +1306,15 @@ async function saveMeta(){
   const saveBtn=document.querySelector('#modal-meta .btn-save');
   if(saveBtn&&saveBtn.disabled)return;
   if(saveBtn){saveBtn.disabled=true;saveBtn.textContent='Salvando...';}
-  const name=document.getElementById('m-name').value.trim()||'Meta';
-  const cat=document.getElementById('m-cat').value;
-  const limit=parseFloat(document.getElementById('m-val').value.replace(',','.'));
-  const startDay=parseInt(document.getElementById('m-start').value)||1;
-  const endDay=parseInt(document.getElementById('m-end').value)||31;
-  if(!cat||!limit||limit<=0){toast('Preencha categoria e limite');return;}
-  if(startDay>endDay){toast('Dia início deve ser menor que dia fim');return;}
-  const m={id:uid(),name,cat,limit,startDay,endDay};
+  const nome=document.getElementById('m-nome').value.trim();
+  const limit=parseFloat((document.getElementById('m-val').value||'').replace(',','.'));
+  if(!nome){toast('Digite o nome da semana');resetModalBtn('modal-meta');return;}
+  if(!limit||limit<=0){toast('Digite o limite de gastos');resetModalBtn('modal-meta');return;}
+  const m={id:uid(),nome,limit};
   metas.push(m);
   await db.dbSave(curUser.uid,'metas',m.id,m);
-  closeModal('modal-meta');renderAll();toast('Meta criada!');
-}
-async function limparGastosMetas(){
-  if(!confirm('Limpar os gastos das metas desta semana? As despesas continuam no histórico.'))return;
-  // Apenas zera o contaMeta das txs desta semana — não apaga do histórico
-  const{start,end}=getWeekRange(curWeekOffset);
-  const toUpdate=txs.filter(t=>t.tipo==='despesa'&&contaNoLimite(t)&&(
-    t.semanaOffset===curWeekOffset||
-    (t.semanaOffset===undefined&&dateInRange(t.date,start,end))
-  ));
-  for(const t of toUpdate){
-    t.contaMeta=false;
-    t.semanaOffset=null;
-    await db.dbSave(curUser.uid,'txs',t.id,{...t});
-  }
-  renderMetas();
-  renderAll();
-  toast(`✓ ${toUpdate.length} gasto(s) removidos das metas. Histórico intacto.`);
+  updateSemanasSelect();
+  closeModal('modal-meta');renderAll();toast('Semana criada!');
 }
 
 async function deleteMeta(id){metas=metas.filter(m=>m.id!==id);await db.dbDel(curUser.uid,'metas',id);renderAll();toast('Meta excluída');}
@@ -1459,11 +1391,18 @@ function openTxModal(){
 // Estado do toggle Sim/Não
 let contaMetaAtual=true;
 
+let semanaOffsetAtual=0;
+function selSemana(o){
+  semanaOffsetAtual=o;
+  [0,-1,-2].forEach(x=>{
+    const el=document.getElementById('sw-'+x);
+    if(el)el.className='typebtn'+(x===o?' sel-r':'');
+  });
+}
 function selMeta(val){
   contaMetaAtual=val;
   document.getElementById('meta-sim').className='typebtn'+(val?' sel-r':'');
   document.getElementById('meta-nao').className='typebtn'+(!val?' sel-d':'');
-  // Mostrar/esconder seletor de semana
   const sw=document.getElementById('meta-semana-wrap');
   if(sw)sw.style.display=val?'block':'none';
   updateMetaInfo();
@@ -1477,17 +1416,22 @@ function selFixa(val){
   document.getElementById('fixa-sim').className='typebtn'+(val?' sel-r':'');
   document.getElementById('fixa-nao').className='typebtn'+(!val?' sel-d':'');
 }
+function updateSemanasSelect(){
+  const sel=document.getElementById('f-semana-id');
+  if(!sel)return;
+  sel.innerHTML='<option value="">Nenhuma (não conta nas metas)</option>'+
+    metas.map(m=>`<option value="${m.id}">${m.nome} — limite ${fmt(m.limit)}</option>`).join('');
+}
+
 function selType(t){
   txType=t;
   document.getElementById('btn-r').className='typebtn'+(t==='receita'?' sel-r':'');
   document.getElementById('btn-d').className='typebtn'+(t==='despesa'?' sel-d':'');
   document.getElementById('f-cat').innerHTML=(t==='receita'?CATS_R:CATS_D).map(c=>`<option>${c}</option>`).join('');
-  // Mostra campo É fixa só em despesa
-  const fixaWrap=document.getElementById('fixa-wrap');
-  if(fixaWrap)fixaWrap.style.display=t==='despesa'?'block':'none';
-  // Mostra/esconde bloco de meta
+  // Mostra campo semana só em despesa
   const wrap=document.getElementById('meta-toggle-wrap');
-  if(wrap) wrap.style.display=t==='despesa'?'block':'none';
+  if(wrap)wrap.style.display=t==='despesa'?'block':'none';
+  if(t==='despesa')updateSemanasSelect();
   updateObjLink();
   updateMetaInfo();
 }
@@ -1571,10 +1515,10 @@ async function saveTx(){
     }
   }
   // Garante boolean explícito
-  const contaMeta=txType==='despesa'?(contaMetaAtual===true):false;
+  const semanaId=txType==='despesa'?(document.getElementById('f-semana-id')?.value||''):'';
+  const contaMeta=semanaId!==''; // conta se escolheu uma semana
   const objLinkId=document.getElementById('f-obj-link')?.value||'';
-  const semanaOffset=contaMeta?parseInt(document.getElementById('f-semana-offset')?.value||'0'):0;
-  const tx={id:uid(),tipo:txType,desc,val,date,cat,contaMeta:contaMeta,semanaOffset:semanaOffset,objLink:objLinkId};
+  const tx={id:uid(),tipo:txType,desc,val,date,cat,contaMeta:contaMeta,semanaId:semanaId,objLink:objLinkId};
   txs.push(tx);
   await db.dbSave(curUser.uid,'txs',tx.id,tx);
   // Se vinculou a objetivo, deposita automaticamente
