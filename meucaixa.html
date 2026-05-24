@@ -163,15 +163,15 @@ input,select,button{font-family:inherit;}
 .sec-link{font-size:12px;color:var(--g);cursor:pointer;font-weight:600;}
 
 /* ── TRANSACTIONS ── */
-.tx-item{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--brd);transition:opacity .15s;}
+.tx-item{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--brd);transition:opacity .15s;min-width:0;overflow:hidden;}
 .tx-item:last-child{border-bottom:none;}
 .tx-item:hover{opacity:.85;}
-.tx-ico{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;transition:transform .15s;}
+.tx-ico{width:40px;height:40px;min-width:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;transition:transform .15s;}
 .tx-item:hover .tx-ico{transform:scale(1.08);}
-.tx-info{flex:1;min-width:0;}
+.tx-info{flex:1;min-width:0;overflow:hidden;}
 .tx-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.tx-meta{font-size:11px;color:var(--tx3);margin-top:2px;}
-.tx-amt{font-size:13px;font-weight:700;font-family:'DM Mono',monospace;white-space:nowrap;}
+.tx-meta{font-size:11px;color:var(--tx3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tx-amt{font-size:13px;font-weight:700;font-family:'DM Mono',monospace;white-space:nowrap;flex-shrink:0;}
 .tx-del{background:none;border:none;color:var(--tx3);font-size:17px;cursor:pointer;padding:5px;flex-shrink:0;border-radius:6px;transition:color .15s,background .15s;}
 .tx-del:hover{color:var(--r);background:var(--rl);}
 .pos{color:var(--g);}.neg{color:var(--r);}
@@ -647,7 +647,6 @@ button,a,.nav-btn,.snav,.tab,.typebtn,.gact,.badge,.dep-key{touch-action:manipul
       <button class="nav-btn" id="nav-historico" onclick="goView('historico')"><i class="ti ti-arrows-exchange"></i>Histórico</button>
       <button class="nav-btn" id="nav-objetivos" onclick="goView('objetivos')"><i class="ti ti-target"></i>Objetivos</button>
       <button class="nav-btn" id="nav-metas" onclick="goView('metas')"><i class="ti ti-calendar-week"></i>Metas</button>
-      <button class="nav-btn" id="nav-cartao" onclick="goView('cartao')"><i class="ti ti-credit-card"></i>Cartão</button>
       <button class="nav-btn" id="nav-insights" onclick="goView('insights')"><i class="ti ti-chart-dots"></i>Insights</button>
     </div>
   </div>
@@ -774,7 +773,7 @@ button,a,.nav-btn,.snav,.tab,.typebtn,.gact,.badge,.dep-key{touch-action:manipul
     <div class="modal-title">Nova meta de categoria</div>
     <div class="fgroup"><div class="flabel">Categoria</div><select class="fselect" id="m-cat">
       <option>Alimentação</option><option>Transporte</option><option>Saúde</option>
-      <option>Moradia</option><option>Lazer</option><option>Beleza</option>
+      <option>Moradia</option><option>Recarga de celular</option><option>Lazer</option><option>Beleza</option>
       <option>Educação</option><option>Pet</option><option>Presente / Doação</option><option>Outros</option>
     </select></div>
     <div class="fgroup"><div class="flabel">Limite mensal (R$)</div><input class="finput" id="m-val" type="text" inputmode="decimal" placeholder="Ex: 300,00"></div>
@@ -856,7 +855,7 @@ const CATS_D=[
   'Alimentação','Mercado','Restaurante','Lanche / Delivery',
   'Transporte','Gasolina','Uber / Táxi','Moto / Revisão',
   'Saúde','Farmácia','Plano de saúde','Médico / Dentista',
-  'Moradia','Aluguel','Energia','Água','Internet',
+  'Moradia','Aluguel','Energia','Água','Internet','Recarga de celular',
   'Lazer','Cinema','Streaming','Shopping','Loja de roupas','Jogos',
   'Beleza','Corte de cabelo','Cabeleireiro','Produtos de cabelo','Produtos de beleza',
   'Cartão de crédito','Fatura cartão',
@@ -867,7 +866,7 @@ const CAT_ICON={
   'Alimentação':'ti-tools-kitchen-2','Mercado':'ti-shopping-cart','Restaurante':'ti-chef-hat','Lanche / Delivery':'ti-motorbike',
   'Transporte':'ti-car','Gasolina':'ti-gas-station','Uber / Táxi':'ti-car','Moto / Revisão':'ti-motorbike',
   'Saúde':'ti-heart-pulse','Farmácia':'ti-pill','Plano de saúde':'ti-shield-heart','Médico / Dentista':'ti-stethoscope',
-  'Moradia':'ti-home','Aluguel':'ti-building','Energia':'ti-bolt','Água':'ti-droplet','Internet':'ti-wifi',
+  'Moradia':'ti-home','Aluguel':'ti-building','Energia':'ti-bolt','Água':'ti-droplet','Internet':'ti-wifi','Recarga de celular':'ti-device-mobile',
   'Lazer':'ti-device-gamepad-2','Cinema':'ti-movie','Streaming':'ti-brand-netflix','Shopping':'ti-shopping-bag','Loja de roupas':'ti-shirt','Jogos':'ti-device-gamepad',
   'Beleza':'ti-sparkles','Corte de cabelo':'ti-scissors','Cabeleireiro':'ti-scissors','Produtos de cabelo':'ti-bottle','Produtos de beleza':'ti-sparkles',
   'Educação':'ti-school','Pet':'ti-paw','Presente / Doação':'ti-gift',
@@ -880,7 +879,7 @@ const CAT_CLS={
   'Alimentação':'ic-b','Mercado':'ic-b','Restaurante':'ic-b','Lanche / Delivery':'ic-b',
   'Transporte':'ic-a','Gasolina':'ic-a','Uber / Táxi':'ic-a','Moto / Revisão':'ic-a',
   'Saúde':'ic-g','Farmácia':'ic-g','Plano de saúde':'ic-g','Médico / Dentista':'ic-g',
-  'Moradia':'ic-p','Aluguel':'ic-p','Energia':'ic-p','Água':'ic-te','Internet':'ic-te',
+  'Moradia':'ic-p','Aluguel':'ic-p','Energia':'ic-p','Água':'ic-te','Internet':'ic-te','Recarga de celular':'ic-te',
   'Lazer':'ic-pi','Cinema':'ic-pi','Streaming':'ic-pi','Shopping':'ic-pi','Loja de roupas':'ic-pi','Jogos':'ic-pi',
   'Beleza':'ic-pi','Corte de cabelo':'ic-pi','Cabeleireiro':'ic-pi','Produtos de cabelo':'ic-pi','Produtos de beleza':'ic-pi',
   'Educação':'ic-bl','Pet':'ic-a','Presente / Doação':'ic-pi',
