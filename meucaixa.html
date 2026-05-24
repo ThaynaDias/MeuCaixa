@@ -21,7 +21,8 @@ async function dbDel(u,c,i){await deleteDoc(doc(fdb,'users',u,c,i));}
 async function dbUpd(u,c,i,d){await updateDoc(doc(fdb,'users',u,c,i),d);}
 async function dbAll(u,c){const s=await getDocs(collection(fdb,'users',u,c));return s.docs.map(d=>({id:d.id,...d.data()}));}
 window._fb={db:{dbSave,dbDel,dbUpd,dbAll},auth:{signInWithEmailAndPassword,signOut,onAuthStateChanged,auth:fauth}};
-window.dispatchEvent(new Event('fb-ready'));
+window._fbReady=true;
+if(window._fbReadyCb)window._fbReadyCb();
 </script>
 <style>
 :root{
@@ -977,15 +978,13 @@ function fmtWeekLabel(offset){
 }
 
 // ── FIREBASE AUTH ─────────────────────────────────────────────────
-window.addEventListener('fb-ready',()=>{
+function initFirebase(){
   db=window._fb.db;authFns=window._fb.auth;
   authFns.onAuthStateChanged(authFns.auth,async user=>{
     document.getElementById('scr-load').style.display='none';
     if(user){
-      // Verificar se sessão expirou (ex: abriu o app depois de muito tempo)
       const lastSess=parseInt(localStorage.getItem('mc_session')||'0');
       if(lastSess&&(Date.now()-lastSess)>SESSION_MS){
-        // Sessão expirada — forçar logout silencioso e ir para login
         localStorage.removeItem('mc_session');
         await authFns.signOut(authFns.auth);
         return;
@@ -1011,7 +1010,20 @@ window.addEventListener('fb-ready',()=>{
       loadSavedEmail();
     }
   });
-});
+}
+// Funciona independente da ordem de execução entre module e script normal
+if(window._fbReady){initFirebase();}
+else{
+  window._fbReadyCb=initFirebase;
+  // Fallback: se Firebase não carregar em 12s, mostra tela de login com erro
+  setTimeout(()=>{
+    if(!window._fbReady){
+      document.getElementById('scr-load').style.display='none';
+      document.getElementById('scr-login').classList.add('on');
+      document.getElementById('lerr').textContent='Erro de conexão. Verifique sua internet.';
+    }
+  },12000);
+}
 
 function maskEmail(email){
   const[user,domain]=email.split('@');
