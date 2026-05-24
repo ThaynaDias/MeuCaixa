@@ -142,7 +142,7 @@ input,select,button{font-family:inherit;}
 @keyframes viewIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
 
 /* ── CARDS ── */
-.card{background:var(--sur);border-radius:var(--rad);border:1px solid var(--brd);padding:18px;box-shadow:var(--sh);transition:box-shadow .2s,transform .2s;}
+.card{background:var(--sur);border-radius:var(--rad);border:1px solid var(--brd);padding:18px;box-shadow:var(--sh);transition:box-shadow .2s,transform .2s;min-width:0;overflow:hidden;width:100%;}
 .card:hover{box-shadow:var(--sh-md);transform:translateY(-1px);}
 .saldo-card{background:linear-gradient(135deg,#0D6B4F 0%,#1D9E75 50%,#2DB88A 100%);border-radius:var(--rad);padding:26px;color:#fff;box-shadow:0 6px 24px rgba(29,158,117,.4),0 2px 8px rgba(0,0,0,.1);position:relative;overflow:hidden;}
 .saldo-card::before{content:'';position:absolute;top:-40px;right:-40px;width:180px;height:180px;background:rgba(255,255,255,.06);border-radius:50%;pointer-events:none;}
@@ -153,7 +153,7 @@ input,select,button{font-family:inherit;}
 .saldo-sub{background:rgba(255,255,255,.15);border-radius:14px;padding:13px 16px;backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);min-width:0;overflow:hidden;}
 .saldo-sub-label{font-size:10px;opacity:.7;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em;font-weight:500;}
 .saldo-sub-val{font-size:17px;font-weight:700;font-family:'DM Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;min-width:0;overflow:hidden;}.grid2>div{min-width:0;overflow:hidden;}
 .carry{background:var(--gl);border:1px solid rgba(29,158,117,.2);border-radius:var(--rad);padding:13px 18px;display:flex;align-items:center;gap:12px;box-shadow:var(--sh);min-width:0;overflow:hidden;}
 .carry i{font-size:22px;color:var(--g);flex-shrink:0;}
 .carry-tx{font-size:12px;color:#085041;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -186,7 +186,7 @@ input,select,button{font-family:inherit;}
 .tab.active{background:var(--sur);color:var(--tx);font-weight:600;box-shadow:var(--sh);}
 
 /* ── GOALS ── */
-.goal-card{background:var(--sur);border:1px solid var(--brd);border-radius:var(--rad);padding:18px;display:flex;flex-direction:column;gap:11px;box-shadow:var(--sh);transition:box-shadow .2s,transform .2s;}
+.goal-card{background:var(--sur);border:1px solid var(--brd);border-radius:var(--rad);padding:18px;display:flex;flex-direction:column;gap:11px;box-shadow:var(--sh);transition:box-shadow .2s,transform .2s;min-width:0;overflow:hidden;width:100%;}
 .goal-card:hover{box-shadow:var(--sh-md);transform:translateY(-1px);}
 .goal-card.done{border-color:rgba(29,158,117,.25);background:var(--gl);}
 .goal-top{display:flex;align-items:center;gap:12px;}
@@ -445,7 +445,7 @@ button,a,.nav-btn,.snav,.tab,.typebtn,.gact,.badge,.dep-key{touch-action:manipul
   .modal{border-radius:24px 24px 0 0;max-width:100%;position:fixed;bottom:0;left:0;right:0;max-height:95dvh;}
   .modal-wrap{align-items:flex-end;padding:0;}
   .modal-handle{display:block;width:40px;height:4px;background:var(--brd);border-radius:99px;margin:0 auto 18px;}
-  .grid2{grid-template-columns:1fr;}
+  .grid2{grid-template-columns:1fr;width:100%;max-width:100%;}
   .saldo-val{font-size:28px;}
   .card{padding:14px;}
   .saldo-card{padding:20px;}
@@ -509,7 +509,6 @@ button,a,.nav-btn,.snav,.tab,.typebtn,.gact,.badge,.dep-key{touch-action:manipul
       <button class="snav active" id="snav-home" onclick="goView('home')"><i class="ti ti-home"></i>Início</button>
       <button class="snav" id="snav-historico" onclick="goView('historico')"><i class="ti ti-arrows-exchange"></i>Histórico</button>
       <button class="snav" id="snav-objetivos" onclick="goView('objetivos')"><i class="ti ti-target"></i>Objetivos</button>
-      <button class="snav" id="snav-cartao" onclick="goView('cartao')"><i class="ti ti-credit-card"></i>Cartão</button>
       <button class="snav" id="snav-metas" onclick="goView('metas')"><i class="ti ti-calendar-week"></i>Metas semanais</button>
       <button class="snav" id="snav-orcamento" onclick="goView('orcamento')"><i class="ti ti-chart-bar"></i>Orçamento</button>
       <button class="snav" id="snav-insights" onclick="goView('insights')"><i class="ti ti-chart-dots"></i>Insights</button>
@@ -1248,9 +1247,9 @@ function renderHome(){
   } else {
     cw.style.display='none';
   }
-  const recent=list.slice(0,5);
+  const recent=list.slice(0,3);
   document.getElementById('home-tx').innerHTML=recent.length?recent.map(t=>txHtml(t,false)).join(''):'<div class="empty"><i class="ti ti-receipt-off"></i>Nenhuma transação esse mês</div>';
-  const active=goals.filter(g=>!g.done).slice(0,3);
+  const active=goals.filter(g=>!g.done).slice(0,2);
   document.getElementById('home-goals').innerHTML=active.length?active.map(g=>goalCardHtml(g,true)).join(''):'<div class="card"><div class="empty"><i class="ti ti-target"></i>Nenhum objetivo ainda</div></div>';
 }
 
