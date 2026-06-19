@@ -126,8 +126,8 @@ input,select,button{font-family:inherit;}
 
 /* ── BOTTOM NAV ── */
 .bottomnav{display:none;background:var(--sur);border-top:1px solid var(--brd);padding-bottom:var(--safe-bot);flex-shrink:0;}
-.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:7px 1px 6px;border:none;background:none;color:var(--tx3);font-size:8px;font-weight:500;cursor:pointer;transition:color .2s;position:relative;}
-.nav-btn i{font-size:19px;transition:transform .2s;}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:6px 0px 5px;border:none;background:none;color:var(--tx3);font-size:7px;font-weight:500;cursor:pointer;transition:color .2s;position:relative;}
+.nav-btn i{font-size:17px;transition:transform .2s;}
 .nav-btn.active{color:var(--g);}
 .nav-btn.active i{transform:scale(1.1);}
 .nav-btn.active::after{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:28px;height:3px;background:var(--g);border-radius:99px;}
@@ -662,6 +662,7 @@ button,a,.nav-btn,.snav,.tab,.typebtn,.gact,.badge,.dep-key{touch-action:manipul
       <button class="nav-btn" id="nav-historico" onclick="goView('historico')"><i class="ti ti-arrows-exchange"></i>Histórico</button>
       <button class="nav-btn" id="nav-objetivos" onclick="goView('objetivos')"><i class="ti ti-target"></i>Objetivos</button>
       <button class="nav-btn" id="nav-recorrentes" onclick="goView('recorrentes')"><i class="ti ti-receipt"></i>Fixas</button>
+      <button class="nav-btn" id="nav-orcamento" onclick="goView('orcamento')"><i class="ti ti-chart-bar"></i>Orçamento</button>
       <button class="nav-btn" id="nav-insights" onclick="goView('insights')"><i class="ti ti-chart-dots"></i>Insights</button>
     </div>
   </div>
